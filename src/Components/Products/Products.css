@@ -1,0 +1,107 @@
+.products-display{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0px 80px;
+    gap: 30px;
+    margin-bottom: 50px;
+}
+.products-headline{
+    color: rgb(159, 4, 4);
+    width: 100%;
+    font-size: 15px;
+    text-align: center;
+}
+.products{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 220px);
+    gap: 30px;
+    padding: 0px 50px;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.filter{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    position: relative;
+    padding: 10px 80px;
+}
+.filter input{
+    height: 30px;
+    width: 250px;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid grey;
+    color: rgb(53, 52, 52);
+    transition: 1s;
+}
+.filter input:focus{
+    padding: 10px 10px;
+    width: 300px;
+}
+.filter i {
+    position: absolute;
+    margin-left: 5px;
+}
+.active-sort{
+    color: rgb(169, 5, 5);
+}
+.filter select{
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+@media (max-width: 1020px) {
+    .products-display{
+    padding: 0px 40px;
+    gap: 30px;
+}
+.products{
+    grid-template-columns: repeat(auto-fit, 200px);
+    gap: 20px;
+    padding: 0px 40px;
+}
+}
+@media (max-width: 820px) {
+    .products-display{
+    padding: 0px 20px;
+    gap: 20px;
+}
+.products{
+    grid-template-columns: repeat(auto-fit, 180px);
+    gap: 15px;
+    padding: 0px 20px;
+}
+}
+@media (max-width: 700px) {
+    .products-display{
+    padding: 0px 15px;
+    gap: 15px;
+}
+.products{
+    grid-template-columns: repeat(auto-fit, 160px);
+    gap: 10px;
+    padding: 0px 15px;
+}
+}
+@media (max-width: 580px) {
+    .products-display{
+    padding: 0px 15px;
+    gap: 15px;
+}
+.products{
+    grid-template-columns: repeat(2, 45%);
+    padding: 0px 0px;
+    row-gap: 40px;
+    justify-content: space-evenly;
+}
+}

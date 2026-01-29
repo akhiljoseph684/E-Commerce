@@ -1,0 +1,141 @@
+.navbar{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 80px;
+    border-bottom: 1px  solid rgb(211, 210, 210);
+    position: fixed;
+    top: 0px;
+    z-index: 1;
+    background-color: white;
+    height: 100px;
+}
+.navbar .logo-name{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.logo-name img{
+    width: 120px;
+    cursor: pointer;
+}
+.logo-name h1{
+    font-weight: 600;
+    color: rgba(214, 4, 4, 0.886);
+    margin-left: -20px;
+    font-size: 30px;
+    cursor: pointer;
+}
+.cart-login{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+}
+.cart-icon{
+    position: relative;
+}
+.cart-icon i{
+    font-size: 30px;
+    cursor: pointer;
+}
+.cart-icon i:hover{
+    color: rgba(214, 4, 4, 0.886);
+}
+.cart-login button{
+    padding: 8px 25px;
+    border: 1.5px solid rgba(214, 4, 4, 0.886);
+    border-radius: 20px;
+    background-color: transparent;
+    font-size: 15px;
+    color: rgba(214, 4, 4, 0.886);
+    cursor: pointer;
+}
+.cart-login button:hover{
+    background-color: rgba(214, 4, 4, 0.094);
+}
+.profile{
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border-radius: 50%;
+}
+.dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: red;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+.animate{
+    animation: bounce 1s;
+}
+.dup-animate{
+    animation: dup;
+}
+@keyframes bounce {
+    0%{
+        transform: translateY(0%);
+    }
+    50%{
+        transform: translateY(-50%);
+    }
+    100%{
+        transform: translateY(0%);
+    }
+}
+@keyframes dup {
+    0%{
+        transform: translateY(0%);
+    }
+    100%{
+        transform: translateY(0%);
+    }
+}
+
+
+
+
+@media (max-width: 850px) {
+    .navbar{
+    padding: 0px 50px;
+}
+.logo-name img{
+    width: 100px;
+}
+.logo-name h1{
+    font-size: 25px;
+}
+.cart-login{
+    gap: 30px;
+}
+.cart-icon i{
+    font-size: 25px;
+}
+.cart-login button{
+    padding: 6px 20px;
+    border-radius: 18px;
+    font-size: 12px;
+}
+.profile{
+    width: 30px;
+    height: 30px;
+}
+}
+@media (max-width: 580px) {
+    .navbar{
+    padding: 5px 10px;
+}
+.logo-name img{
+    width: 80px;
+}
+.logo-name h1{
+    font-size: 22px;
+}
+}

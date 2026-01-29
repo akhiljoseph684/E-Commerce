@@ -1,0 +1,180 @@
+.add-products{
+    width: 950px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    gap: 20px;
+    color: rgb(29, 29, 29);
+}
+.add-products label input, .add-products label select{
+    border-radius: 5px;
+    border: 1px solid rgb(181, 181, 181);
+}
+.add-products label{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.add-products label input{
+    width: 600px;
+    padding: 10px;
+}
+.add-products label textarea{
+    width: 600px;
+    padding: 10px;
+    resize: none;
+}
+.add-products label .desc{
+    height: 100px;
+}
+.flex-inputs, .flex-3-inputs{
+    display: flex;
+    gap: 40px;
+}
+.flex-inputs label input{
+    width: 280px;
+    padding: 10px;
+}
+.flex-3-inputs label input, .flex-3-inputs label select{
+    width: 173px;
+    padding: 10px;
+}
+.add-images{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.upload-box{
+    width: 600px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgb(212, 0, 0);
+    border-radius: 20px;
+    margin-top: 30px;
+    gap: 20px;
+}
+.upload-box:hover{
+    background-color: rgba(212, 0, 0, 0.046);
+}
+.upload-box p{
+    font-size: 30px;
+    color: rgb(212, 0, 0);
+    margin-top: 150px;
+}
+.upload-box input{
+    left: 0;
+    position: relative;
+    opacity: 0;
+    top: -70px;
+    padding: 60px;
+    width: 590px;
+}
+.upload-box button{
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    background-color: rgb(212, 0, 0);
+}
+.view-images{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 120px);
+    padding: 20px;
+    gap: 10px;
+    justify-content: center;
+}
+.view-images .view-image, .load-image{
+    height: 120px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgb(180, 179, 179);
+    position: relative;
+}
+.view-images .view-image img{
+    width: 100px;
+}
+.view-image .image-delete{
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+.add-products > button{
+    padding: 20px;
+    background-color: rgb(212, 0, 0);
+    width: 500px;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+}
+.add-products > button:hover{
+    background-color: rgba(212, 0, 0, 0.927);
+}
+.add-products .btn-hidden{
+    opacity: 70%;
+}
+@media (max-width: 1000px) {
+    .add-products{
+    width: 750px;
+}
+.add-products label input, .add-products label textarea{
+    width: 400px;
+}
+.flex-inputs label input{
+    width: 180px;
+}
+.flex-3-inputs label input, .flex-3-inputs label select{
+    width: 110px;
+}
+.upload-box{
+    width: 400px;
+}
+.upload-box input{
+    top: -130px;
+    padding: 60px;
+    width: 400px;
+}
+.add-products > button{
+    width: 400px;
+}
+}
+@media (max-width: 800px) {
+    .add-products{
+        width: 100%;
+    }
+}
+@media (max-width: 550px) {
+    
+.add-products label input, .add-products label textarea{
+    width: 350px;
+}
+.flex-inputs, .flex-3-inputs{
+    gap: 30px;
+}
+.add-products label .desc{
+    height: 80px;
+}
+.flex-inputs label input{
+    width: 160px;
+}
+.flex-3-inputs label input, .flex-3-inputs label select{
+    width: 90px;
+}
+.upload-box{
+    width: 350px;
+}
+.add-products > button{
+    width: 350px;
+}
+.upload-box input{
+    top: -130px;
+    width: 350px;
+}
+}
