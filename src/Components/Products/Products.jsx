@@ -8,15 +8,21 @@ function Products() {
 
   const [products, setProducts] = useState([])
 
-  useEffect(() => {
-    async function check() {
-      let product = await getAllProducts()
-      setProducts(product ? product : [])
-    }
-    check()
-  }, [])
+  const { search, setSearch, getAllProducts } = useContext(AuthContext);
 
-  const {search, setSearch, getAllProducts} = useContext(AuthContext);
+useEffect(() => {
+
+  async function check() {
+
+    const product = await getAllProducts();
+
+    setProducts(product);
+
+  }
+
+  check();
+
+}, []);
   const [sort, setSort] = useState('')
 
   const sortedProducts = [...products].sort((a, b) => {
@@ -28,7 +34,7 @@ function Products() {
       case "rating":
         return b.rating - a.rating;
       default:
-        return a.id - b.id;
+        return a._id - b._id;
     }
   });
 

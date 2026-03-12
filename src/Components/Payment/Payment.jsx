@@ -7,25 +7,36 @@ import { v4 as generateId } from "uuid";
 
 function Payment() {
   const [method, setMethod] = useState("");
-  const navigate = useNavigate()
-  const [paymentError, setPaymentError] = useState('');
+  const navigate = useNavigate();
+  const [paymentError, setPaymentError] = useState("");
   const [user, setUser] = useState({
     name: "",
     phone: "",
-    address: ""
+    address: "",
   });
 
-  const {payment, setPayment, cleanCart, buyNow, setBuyNow, allOrders, getProductById, buyNowProId, createDate, currentUser} = useContext(AuthContext);
+  const {
+    payment,
+    setPayment,
+    cleanCart,
+    buyNow,
+    setBuyNow,
+    buyNowToOrder,
+    buyNowProId,
+    checkoutCart,
+    buyNowOrder
+
+  } = useContext(AuthContext);
 
   useEffect(() => {
-    if(!payment){
-      navigate('/')
+    if (!payment) {
+      navigate("/");
     }
     return () => {
-      setPayment(false)
-      setBuyNow(false)
-    }
-  }, [])
+      setPayment(false);
+      setBuyNow(false);
+    };
+  }, []);
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -36,48 +47,42 @@ function Payment() {
       setPaymentError("Please select a payment method");
       return;
     }
-    
 
-    if(!buyNow) {
-      cleanCart(user.address)
-    } else {
-      let res = await currentUser()
-      let product = await getProductById(buyNowProId)
-      await allOrders([{
-        id: generateId(),
-        product,
-        date: createDate(),
-        quantity: 1,
-        address: user.address,
-        status: 'Pending',
-        user: {
-          name: res.name,
-          email: res.email
-        }
-      }])
+    if (!user.name || !user.phone || !user.address) {
+      setPaymentError("Please fill all details");
+      return;
     }
 
-    toast.success('✅ Order Successful Thank you for shopping with SmartBuy')
-    navigate('/')
+    let success = false;
+
+    if (!buyNow) {
+      success = await checkoutCart(user.address, method);
+    } else {
+      success = await buyNowOrder(buyNowProId, 1, user.address, method);
+    }
+
+    if (success) {
+      toast.success(
+        "✅ Order Successful. Thank you for shopping with SmartBuy",
+      );
+      navigate("/");
+    }
   };
 
   const radioChange = (data) => {
-    setMethod(data)
-    setPaymentError('')
-  }
-
-  
+    setMethod(data);
+    setPaymentError("");
+  };
 
   return (
     <div className="payment-container">
       <h2>Payment Method</h2>
-      {
-        paymentError && 
+      {paymentError && (
         <div className="payment-error">
-            <p>{paymentError}</p>
+          <p>{paymentError}</p>
         </div>
-      }
-       <input
+      )}
+      <input
         type="text"
         name="name"
         placeholder="Full Name"
@@ -99,8 +104,8 @@ function Payment() {
         value={user.address}
         onChange={handleChange}
       />
-    <div>
-          <label>
+      <div>
+        <label>
           <input
             type="radio"
             name="payment"
@@ -130,7 +135,7 @@ function Payment() {
           Cash on Delivery
         </label>
       </div>
-      
+
       <button onClick={handlePayment}>Pay Now</button>
     </div>
   );

@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { assets } from "./assets/assets";
 import { v4 as generateId } from "uuid";
+import api from "./axios";
 
 export const AuthContext = createContext();
 
 function AuthContextProvider({ children }) {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState("");
   const [search, setSearch] = useState("");
   const [cartChange, setCartChange] = useState(0);
   const [buyNow, setBuyNow] = useState(false);
@@ -17,12 +20,12 @@ function AuthContextProvider({ children }) {
   const [cartDot, setCartDot] = useState(false);
   const [payment, setPayment] = useState(false);
   const [blockPage, setBlockPage] = useState(false);
-  const [adminLogged, setAdminLogged] = useState(false)
-  
+  const [adminLogged, setAdminLogged] = useState(false);
+
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   let color = `rgb(${Math.floor(Math.random() * 150)}, ${Math.floor(
-    Math.random() * 150
+    Math.random() * 150,
   )}, ${Math.floor(Math.random() * 150)})`;
 
   const findAllUser = async () => {
@@ -41,12 +44,20 @@ function AuthContextProvider({ children }) {
   };
 
   const currentUser = async () => {
-    let email = await localStorage.getItem("email");
-    if (email) {
-      let res = await userExists(email);
-      return res.user;
-    } else {
-      return false;
+    try {
+      const res = await api.get("/auth");
+
+      if (res.data.success) {
+        setUser(res.data.user);
+        setLoading(false);
+        return res.data.user;
+      }
+
+      setLoading(false);
+      return null;
+    } catch (error) {
+      setLoading(false);
+      return null;
     }
   };
 
@@ -60,58 +71,55 @@ function AuthContextProvider({ children }) {
     return { success: false };
   };
 
-  const register = async ({ name, email, password }) => {
-    if (!name || !email || !password) {
-      return { success: false, message: "Fill the Empty fields" };
-    }
-    let res = await userExists(email);
-    if (res.success) {
-      return { success: false, message: "User is Already exists" };
-    }
-    if (password.length < 8) {
-      return { success: false, message: "Password Must be a 8 Characters" };
-    }
-
+  const register = async (data) => {
     try {
-      let u = await findAllUser();
-      if (u) {
-        u = JSON.parse(u);
-        let user = [...u, { name, email, password, cart: {}, order: [], block: false }];
-        await localStorage.setItem("user", JSON.stringify(user));
-        await localStorage.setItem("email", email);
-      } else {
-        await localStorage.setItem(
-          "user",
-          JSON.stringify([{ name, email, password, cart: {}, order: [], block: false }])
-        );
-        await localStorage.setItem("email", email);
+      const res = await api.post("/auth/register", data);
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return false;
       }
+
+      setUser(res.data.user);
+
+      toast.success("Registration successful");
+
+      navigate("/");
+
+      return true;
     } catch (error) {
-      return { success: false, message: error.message };
+      toast.error(error.response?.data?.message);
+      return false;
     }
-    setUsername(name);
-    return {
-      success: true,
-      message: "User Registered Successfully",
-    };
   };
 
-  const login = async ({ email, password }) => {
-    if (!email || !password) {
-      return { success: false, message: "Fill the Empty fields" };
+
+  const login = async (data) => {
+    try {
+      const res = await api.post("/auth/login", data);
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return false;
+      }
+
+      setUser(res.data.user);
+
+      if (res.data.user.role === "admin") {
+        navigate("/admin/add-products");
+      } else {
+        navigate("/");
+      }
+
+      toast.success("Login successful");
+
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+      return false;
     }
-    let res = await userExists(email);
-    if (!res.success) {
-      return { success: false, message: "User does not Available" };
-    }
-    const { user } = res;
-    if (password !== user.password) {
-      return { success: false, message: "Wrong Password" };
-    }
-    setUsername(user.name);
-    await localStorage.setItem("email", email);
-    return { success: true, message: "User Logged Successfully" };
   };
+
 
   const logout = async () => {
     await localStorage.removeItem("email");
@@ -119,149 +127,122 @@ function AuthContextProvider({ children }) {
     return { success: true, message: "You have been logged out successfully." };
   };
 
-  const addToCart = async (id) => {
-    let res = await currentUser();
+  const addToCart = async (productId) => {
+    try {
+      const res = await api.post("/cart", { productId });
 
-    if (!res) {
-      navigate("/login");
-      return { success: false, message: "Please Login" };
-    }
-    let users = await JSON.parse(localStorage.getItem("user")) || [];
-    users = users.map((user) => {
-      if (user.email === res.email) {
-        res.cart[id] = res.cart[id] ? res.cart[id] + 1 : 1;
-        return res;
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return;
       }
-      return user;
-    });
-    await localStorage.setItem("user", JSON.stringify(users));
-    toast.success("Added to cart Successfully");
-    setCartDot(b  => !b);
-    setCartChange((prev) => prev + 1);
+
+      toast.success("Added to cart");
+
+      setCartChange((prev) => prev + 1);
+    } catch (error) {
+      toast.error(error.response.data.message || "Cart error");
+    }
   };
 
-  const removeFromCart = async (id) => {
-    let res = await currentUser();
+  
 
-    if (!res) {
-      navigate("/login");
-      return { success: false, message: "Please Login" };
-    }
-    let users = await JSON.parse(localStorage.getItem("user"));
-    users = users.map((user) => {
-      if (user.email === res.email) {
-        res.cart[id] = res.cart[id] ? res.cart[id] - 1 : 0;
-        if (!res.cart[id]) delete res.cart[id];
-        return res;
+  const removeFromCart = async (productId) => {
+    try {
+      const res = await api.patch(`/cart/${productId}`);
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return;
       }
-      return user;
-    });
-    await localStorage.setItem("user", JSON.stringify(users));
-    setCartDot((b) => true);
-    setCartChange((prev) => prev - 1);
+
+      setCartChange((prev) => prev + 1);
+    } catch (error) {
+      toast.error(error.response.data.message || "Cart error");
+    }
   };
+
+ 
 
   const getCartData = async () => {
-    let res = await currentUser();
-    if (!res) {
-      navigate("/login");
-      return;
-    }
-    if (Object.keys(res.cart).length === 0)
-      return { success: false, message: "Cart is Empty" };
+    try {
+      const res = await api.get("/cart");
 
-    let cart = [];
-
-    for (let proId in res.cart) {
-      let product = await getProductById(proId);
-      cart.push({ product, quantity: res.cart[proId] });
-    }
-    return { success: true, data: cart };
-  };
-
-  const getProductById = async (id) => {
-    // let product = assets.find((product) => product.id == id);
-    // return product;
-    let products = await localStorage.getItem('products');
-    if(products){
-      products = JSON.parse(products);
-      let product = products.find((product) => product.id === id)
-      if(product){
-        return product || {}
-      }else{
-        return ''
-      }
-    }
-  };
-
-  const cleanCart = async (address) => {
-  const res = await currentUser();
-  if (!res) return;
-
-  const orderDetails = [];
-
-  for (const proId of Object.keys(res.cart)) {
-    const product = await getProductById(proId);
-
-    orderDetails.push({
-      id: generateId(),
-      product,
-      date: createDate(),
-      quantity: res.cart[proId],
-      address,
-      status: "Pending",
-    });
-  }
-
-  let users = JSON.parse(localStorage.getItem("user"));
-
-  users = users.map((user) => {
-    if (user.email === res.email) {
+      return res.data;
+    } catch (error) {
       return {
-        ...user,
-        cart: {},
-        order: [...user.order, ...orderDetails],
+        success: false,
+        message: error.response?.data?.message || "Failed to load cart",
       };
     }
-    return user;
-  });
-
-  const cartOrders = orderDetails.map((order) => ({
-    ...order,
-    user: {
-      name: res.name,
-      email: res.email,
-    },
-  }));
-
-  await localStorage.setItem("user", JSON.stringify(users));
-  await allOrders(cartOrders);
-
-  setCartChange(0);
-  setCartDot(false);
-};
-
-
-  const buyNowToOrder = async (order) => {
-    let res = await currentUser();
-    let users = await findAllUser();
-    users = JSON.parse(users);
-    users = users.map((user) => {
-      if (user.email === res.email) {
-        order.map((o) => {
-          res.order.push(o);
-        });
-        return res;
-      }
-      return user;
-    });
-    await localStorage.setItem("user", JSON.stringify(users));
   };
+
+
+  const getProductById = async (id) => {
+    try {
+      const res = await api.get(`/users/products/${id}`);
+
+      if (res.data.success) {
+        return res.data.product;
+      }
+
+      return null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+ 
+  const cleanCart = async () => {
+    try {
+      const res = await api.post("/orders/checkout");
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return;
+      }
+
+      toast.success("Order placed successfully");
+
+      setCartChange((prev) => prev + 1);
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+    }
+  };
+
+ 
+  const buyNowToOrder = async (productId, quantity = 1) => {
+    try {
+      const res = await api.post("/orders/buynow", {
+        productId,
+        quantity,
+      });
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return;
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+
 
   const getAllOrders = async () => {
-    let res = await localStorage.getItem("order");
-    return res ? JSON.parse(res) : false;
+    try {
+      const res = await api.get("/order");
+
+      if (res.data.success) {
+        return res.data.orders;
+      }
+
+      return [];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   };
+
 
   const saveUser = async (email, newuser) => {
     let users = await findAllUser();
@@ -275,18 +256,21 @@ function AuthContextProvider({ children }) {
     await localStorage.setItem("user", JSON.stringify(users));
   };
 
-  const saveProduct = async (id, product) => {
-    let products = await getAllProducts();
-    products = products.map((pro) => {
-      if (pro.id === id) {
-        return {
-          ...product,
-          id
-        }
-      }
-      return pro;
-    });
-    await localStorage.setItem("products", JSON.stringify(products));
+  const saveProduct = async (id, formData) => {
+    try {
+      const res = await api.put(`/admin/products/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Update failed",
+      };
+    }
   };
 
   const allOrders = async (cartOrders) => {
@@ -294,7 +278,7 @@ function AuthContextProvider({ children }) {
     cartOrders.map((order) => {
       orderDetails.push(order);
     });
-    if(buyNow)buyNowToOrder(orderDetails);
+    if (buyNow) buyNowToOrder(orderDetails);
     let order = await localStorage.getItem("order");
     if (order) {
       order = JSON.parse(order);
@@ -328,108 +312,181 @@ function AuthContextProvider({ children }) {
   };
 
   const getAllProducts = async () => {
-    let products = await localStorage.getItem("products");
-    return JSON.parse(products);
+    try {
+      const res = await api.get("/users/products");
+
+      if (res.data.success) {
+        return res.data.products;
+      }
+
+      return [];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   };
 
-  const addProducts = async ({
-    name,
-    description,
-    price,
-    offer_price,
-    color,
-    brand,
-    category,
-    image,
-  }) => {
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !offer_price ||
-      !color ||
-      !brand ||
-      !category
-    ) {
-      return { success: false, message: "Fill the Empty fields" };
-    }
+ 
 
-    if (image.length !== 4) {
+  const addProducts = async (formData) => {
+    try {
+      const res = await api.post("/admin/products", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success(res.data.message)
+      return res.data;
+    } catch (error) {
       return {
         success: false,
-        message: `Please Upload ${
-          !image.length ? "Images" : `${4 - image.length} More image`
-        }`,
+        message: error.response.data.message
       };
     }
-    const id = generateId();
-    let product = {
-      id,
-      name,
-      description,
-      price,
-      offer_price,
-      color,
-      brand,
-      category,
-      rating: 4.5,
-      image,
-    };
-    const products = await getAllProducts();
-    console.log(products);
-    if (!products) {
-      await localStorage.setItem("products", JSON.stringify([product]));
-    } else {
-      await localStorage.setItem(
-        "products",
-        JSON.stringify([...products, product])
-      );
-    }
-    return { success: true, message: "Product Added" };
   };
 
   const deleteProductById = async (id) => {
-    let products = await getAllProducts();
-    products = products.filter((x) => x.id !== id);
-    if (products.length) {
-      await localStorage.setItem("products", JSON.stringify(products));
-    } else {
-      await localStorage.removeItem("products");
+    try {
+      const res = await api.delete(`/admin/products/${id}`);
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return [];
+      }
+
+      return await getAllProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+      return [];
     }
-    return products;
   };
 
   const userOrder = async () => {
-    let res = await currentUser();
-    return res.order;
+    try {
+      const res = await api.get("/order/myorders");
+
+      if (res.data.success) {
+        return res.data.orders;
+      }
+
+      return [];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   };
 
-  const adminLogin = async ({email, password}) => {
-    await localStorage.setItem('admin', true)
-    if(!email || !password){
-      return {success: false, message: 'Fill your Empty Field'}
-    }
 
-      let res = await fetch(`http://localhost:5000/admins?email=${email}&password=${password}`);
-      let data = await res.json();
-      if(data.length < 1){
-        return {success: false, message: 'Email and Password will does not match'}
+
+  const checkoutCart = async (address, paymentMethod) => {
+    try {
+      const res = await api.post("/order/checkout", {
+        address,
+        paymentMethod,
+      });
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return false;
       }
-      setAdminLogged(true)
-      await localStorage.setItem('admin', true)
-      return {success: true, message: 'Admin Login Success'} 
-  }
 
-  const checkAdminLogged = async () => {
-    let res = await localStorage.getItem('admin')
-    if(res){
-      setAdminLogged(true)
+      toast.success("Order placed successfully");
+
+      setCartChange((prev) => prev + 1);
+
       return true;
-    }else{
-      setAdminLogged(false)
+    } catch (error) {
+      toast.error(error.response.data.message);
       return false;
     }
-  }
+  };
+
+  const buyNowOrder = async (productId, quantity, address, paymentMethod) => {
+    try {
+      const res = await api.post("/order/buynow", {
+        productId,
+        quantity,
+        address,
+        paymentMethod,
+      });
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return false;
+      }
+
+      toast.success("Order placed successfully");
+
+      return true;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      return false;
+    }
+  };
+
+  const adminLogin = async ({ email, password }) => {
+    await localStorage.setItem("admin", true);
+    if (!email || !password) {
+      return { success: false, message: "Fill your Empty Field" };
+    }
+
+    let res = await fetch(
+      `http://localhost:5000/admins?email=${email}&password=${password}`,
+    );
+    let data = await res.json();
+    if (data.length < 1) {
+      return {
+        success: false,
+        message: "Email and Password will does not match",
+      };
+    }
+    setAdminLogged(true);
+    await localStorage.setItem("admin", true);
+    return { success: true, message: "Admin Login Success" };
+  };
+
+  const checkAdminLogged = async () => {
+    let res = await localStorage.getItem("admin");
+    if (res) {
+      setAdminLogged(true);
+      return true;
+    } else {
+      setAdminLogged(false);
+      return false;
+    }
+  };
+
+  const updateOrderStatus = async (id, status) => {
+    try {
+      const res = await api.patch(`/order/${id}`, { status });
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        return false;
+      }
+
+      toast.success("Order status updated");
+
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Update failed");
+      return false;
+    }
+  };
+  const getAllUsers = async () => {
+    try {
+      const res = await api.get("/admin/users");
+
+      if (res.data.success) {
+        return res.data.data;
+      }
+
+      return [];
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+      return [];
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -477,7 +534,15 @@ function AuthContextProvider({ children }) {
         saveProduct,
         adminLogin,
         adminLogged,
-        setAdminLogged
+        setAdminLogged,
+        checkoutCart,
+        user,
+        setUser,
+        buyNowOrder,
+        loading,
+        setLoading,
+        updateOrderStatus,
+        getAllUsers,
       }}
     >
       {children}

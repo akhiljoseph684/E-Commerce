@@ -25,7 +25,7 @@ function ViewProducts() {
           case "high":
             return b.offer_price - a.offer_price;
           default:
-            return a.id - b.id;
+            return a._id - b._id;
         }
       }) : []
 
@@ -57,13 +57,13 @@ function ViewProducts() {
         <table>
         {
             sortedProducts.filter(product => product.name.includes(search)).map((product) => (
-                <tr key={product.id}>
-                    <td><img src={product.image[0]} alt="" /></td>
+                <tr key={product._id}>
+                    <td><img src={`http://localhost:4000/uploads/${product.image[0]}`} alt="" /></td>
                     <td>{product.name}</td>
                     <td className='mobile-hide'>{product.brand}</td>
                     <td>{product.offer_price}</td>
-                    <td><button className='edit-btn' onClick={() => navigate(`/admin/add-products/${product.id}`)}>Edit</button></td>
-                    <td><button className='delete-btn' onClick={() => handleDelete(product.id)}>Delete</button></td>
+                    <td><button className='edit-btn' onClick={() => navigate(`/admin/add-products/${product._id}`)}>Edit</button></td>
+                    <td><button className='delete-btn' onClick={() => handleDelete(product._id)}>Delete</button></td>
                 </tr>
             ))
         }

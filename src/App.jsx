@@ -13,6 +13,7 @@ import Payment from './Components/Payment/Payment.jsx';
 import Admin from './Pages/Admin/Admin.jsx';
 import UserOrder from './Components/UserOrder/UserOrder.jsx';
 import BlockPage from './Components/BlockPage/BlockPage.jsx';
+import RoleBaseAccess from './Components/RoleBaseAccess.jsx';
 
 function App() {
 
@@ -45,7 +46,11 @@ useEffect(() =>  {
         <Route path='/cart' element={<Cart />}></Route>
         <Route path='/order' element={<UserOrder />}></Route>
         <Route path='/payment' element={<Payment />}></Route>
-        <Route path='/admin/*' element={<Admin />}></Route>
+        <Route path='/admin/*' element={
+          <RoleBaseAccess>
+            <Admin />
+          </RoleBaseAccess>
+          }></Route>
       </Routes>
       <Footer />
     </>

@@ -1,75 +1,84 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../../AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function UserOrder() {
+  const { userOrder } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const [orders, setOrders] = useState([]);
 
-    const {userOrder, blockPage, setBlockPage, currentUser} = useContext(AuthContext);
-    const [orders, setOrders] = useState([]);
-    const [user, setUser] = useState({})
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-
-  useEffect(()  => {
-    async function check () {
-      let res = await currentUser()
-      if(!res){
-        navigate('/login')
-        return;
-      }
-      if(res.block && !blockPage){
-          setBlockPage(!blockPage)
-          navigate('/blocked')
-      }
-      setUser(res)
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
     }
-    check()
-  })
+  }, [user]);
 
-    useEffect(() => {
-        async function check() {
-            let order = await userOrder()
-            setOrders(order)
-        }
-        check()
-    }, [])
-
+  useEffect(() => {
+    async function check() {
+      let order = await userOrder();
+      setOrders(order);
+    }
+    check();
+  }, []);
   return (
-    <div className='cart'>
+    <div className="cart">
       {
-        
-        <>
+        orders.length > 0 ? <>
           <h1>Ordered items</h1>
-        <table>
-         <thead>
-          <tr>
-        <th>Image</th>
-        <th>Product Name</th>
-        <th>Price (quantity)</th>
-        <th>Date</th>
-        <th>Status</th>
-        </tr>
-        </thead>
-         <tbody>
-    {
-      orders.map((order, index) => (
-        <tr key={index}>
-          <td className='table-img'>
-            <img src={order.product.image[0]} alt="" />
-          </td>
-          <td>{order.product.name}</td>
-          <td>₹{`${order.product.offer_price * order.quantity} (${order.quantity})`}</td>
-          <td>{order.date}</td>
-          <td style={{color: order.status === 'Pending' ? 'red' : 'green'}}>{order.status}</td>
-        </tr>
-      ))
-    }
-  </tbody>
-  </table>
-  </>   
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Price (quantity)</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                
+                orders.map((order, index) =>
+                  order.items.map((item, i) => (
+                    <tr key={i}>
+                      <td className="table-img">
+                        <img
+                          src={`http://localhost:4000/uploads/${item.image[0]}`}
+                          alt=""
+                        />
+                      </td>
+
+                      <td>{item.name}</td>
+
+                      <td>
+                        ₹{`${item.price * item.quantity} (${item.quantity})`}
+                      </td>
+
+                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+
+                      <td
+                        style={{
+                          color:
+                            order.orderStatus === "pending" ? "red" : "green",
+                        }}
+                      >
+                        {order.orderStatus}
+                      </td>
+                    </tr>
+                  )),
+                )
+              }
+            </tbody>
+          </table>
+        </>
+        : 
+        <p className="cart-error">Order is empty</p>
+
       }
     </div>
-  )
+  );
 }
 
-export default UserOrder
+export default UserOrder;

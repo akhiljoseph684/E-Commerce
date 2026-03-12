@@ -10,19 +10,19 @@ function ProductsDisplay({item}) {
 
     const {addToCart} = useContext(AuthContext)
 
-    const {id, name, price, offer_price, rating, image} = item;
+    const {_id, name, price, offer_price, rating, image} = item;
     const [imgSrc] = image;
 
     const handleCart = async () => {
-        await addToCart(id)
+        await addToCart(_id)
     }
 
   return (
     <div className='product'>
-        <div className="product-image" onClick={() => navigate('/product/' + id)}>
-            <img src={imgSrc} alt="" />
+        <div className="product-image" onClick={() => navigate('/product/' + _id)}>
+            <img src={`http://localhost:4000/uploads/${imgSrc}`} alt="" />
         </div>
-        <div className="product-details" onClick={() => navigate('/product/' + id)}>
+        <div className="product-details" onClick={() => navigate('/product/' + _id)}>
             <h1>{name}</h1>
             <div className="price">
                 <h3>₹{offer_price}</h3>

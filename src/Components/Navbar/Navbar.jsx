@@ -5,15 +5,25 @@ import order_icon from './../../assets/order-icon.png'
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../AuthContext';
 import { toast } from 'react-toastify';
+import api from '../../axios';
 
 function Navbar({color}) {
 
-  const {username,  userLogged, logout, isLoginPage, cartDot, setCartDot, isCartPage, admin, currentUser, blockPage, setBlockPage} = useContext(AuthContext)
+
+  const {user, setUser} = useContext(AuthContext);
+
+  const {username,  userLogged, logout, isLoginPage, cartDot, setCartDot, isCartPage, admin} = useContext(AuthContext)
   
 
   useEffect(() => {
     async function check () {
       await userLogged()
+      let res = await api.get('/auth');
+      if(!res.data.success){
+        toast.error(res.data.message)
+        return;
+      }
+      setUser(res.data.user)
     } 
     check()
   }, [])
@@ -23,11 +33,6 @@ function Navbar({color}) {
   }, 1000)
 }
 
-  const handleLogout = async () => {
-    let res = await logout()
-    toast.success(res.message)
-    navigate('/login')
-  }
   const navigate = useNavigate()
 
 
@@ -46,8 +51,8 @@ function Navbar({color}) {
             <i className="fa-solid fa-inbox"></i>
           </div>
             {
-              username ?
-              <div className='profile' style={{background: color}} onClick={() => navigate('/profile')}>{username[0].toUpperCase()}</div>
+              user ?
+              <img src={user.image && user.image !== ""  ? user.image : "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360"} alt="profile" onClick={() => navigate('/profile')} />
               :!isLoginPage ?
               <button onClick={() => navigate('/login')}>Login</button>
               : <button onClick={() => navigate('/')}>Guest</button>

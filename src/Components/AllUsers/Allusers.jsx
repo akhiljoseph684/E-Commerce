@@ -1,10 +1,10 @@
-import React from 'react';
-import './Allusers.css'
+// import React from 'react';
+// import './Allusers.css'
 
-function Allusers() {
-  return (
-    <div>Allusers</div>
-  )
-}
+// function Allusers() {
+//   return (
+//     <div>Allusers</div>
+//   )
+// }
 
-export default Allusers
+// export default Allusers

@@ -6,23 +6,6 @@ import { useNavigate } from 'react-router-dom';
 
 function Home() {
 
-  const {currentUser, setBlockPage, blockPage} = useContext(AuthContext);
-  const [user, setUser] = useState({})
-
-  const navigate = useNavigate()
-
-  useEffect(()  => {
-    async function check () {
-      let res = await currentUser()
-      if(res.block && !blockPage){
-          setBlockPage(!blockPage)
-          navigate('/blocked')
-      }
-      setUser(res)
-    }
-    check()
-  }, [])
-
   return (
     <>
         <Banner />
